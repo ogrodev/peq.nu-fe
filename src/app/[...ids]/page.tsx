@@ -10,10 +10,10 @@ export default function Index({ params }: { params: { ids: string[] } }) {
   const router = useRouter();
   useEffect(() => {
     const fetchUrl = async () => {
-      console.debug(params);
-      if (!params.ids[0]) return toast.error("Deu ruim, tente novamente.");
+      const hash = params.ids.slice(-1)[0];
+      if (!hash) return toast.error("Deu ruim, tente novamente.");
       const originalUrl: string = await fetch(
-        `https://peqnu-backend-aflavziouq-uc.a.run.app/${params.ids[0]}`
+        `https://peqnu-backend-aflavziouq-uc.a.run.app/${hash}`
       )
         .then((res) => res.json())
         .then((res: { url: string }) => res.url);
