@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
 
-export default function Index({ params }: { params: { id: string } }) {
+export default function Index({ params }: { params: { ids: string[] } }) {
   const router = useRouter();
   useEffect(() => {
     const fetchUrl = async () => {
+      console.debug(params);
+      if (!params.ids[0]) return toast.error("Deu ruim, tente novamente.");
       const originalUrl: string = await fetch(
-        `https://peqnu-backend-aflavziouq-uc.a.run.app/${params.id}`
+        `https://peqnu-backend-aflavziouq-uc.a.run.app/${params.ids[0]}`
       )
         .then((res) => res.json())
         .then((res: { url: string }) => res.url);
