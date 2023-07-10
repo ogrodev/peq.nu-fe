@@ -1,13 +1,10 @@
-"use client";
 import Loader from "@/components/Loader";
 import Text from "@/components/Typography/text";
 import { BACKEND_URL } from "@/constants/env";
 import { cn } from "@/utils/className";
 import type { Metadata } from "next";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { toast } from "react-hot-toast";
 import urlMetadata from "url-metadata";
+import Redirector from "./Redirector";
 
 type Props = {
   params: { ids: string[] };
@@ -15,21 +12,6 @@ type Props = {
 };
 
 export default function Index({ params }: { params: { ids: string[] } }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchUrl = async () => {
-      const hash = params.ids.slice(-1)[0];
-      if (!hash) return toast.error("Deu ruim, tente novamente.");
-      const originalUrl: string = await fetch(`${BACKEND_URL}${hash}`)
-        .then((res) => res.json())
-        .then((res: { url: string }) => res.url);
-
-      router.push(originalUrl);
-    };
-    fetchUrl().catch(() => toast.error("Deu ruim, tente novamente."));
-  }, []);
-
   return (
     <>
       <main
@@ -40,6 +22,7 @@ export default function Index({ params }: { params: { ids: string[] } }) {
         <Text as="h1" size="5xl" className="mb-10 text-primary">
           Calma que já vai!
         </Text>
+        <Redirector params={params} />
         <Loader />
       </main>
     </>
