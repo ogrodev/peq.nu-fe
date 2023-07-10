@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ImageResponse } from "next/server";
 
 export const runtime = "edge";
 
-export default function GET(request: Request) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const hasTitle = searchParams.has("title");
