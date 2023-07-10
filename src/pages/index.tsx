@@ -8,6 +8,7 @@ import CopyIcon from "@/components/Icons/Copy.icon";
 import PlusIcon from "@/components/Icons/Plus.icon";
 import Loader from "@/components/Loader";
 import Text from "@/components/Typography/text";
+import { BACKEND_URL } from "@/constants/env";
 import { cn } from "@/utils/className";
 import { Expletus_Sans, Poppins } from "next/font/google";
 import Head from "next/head";
@@ -38,7 +39,7 @@ export default function Home() {
   const fetchShortened = async (url: string) => {
     const res: {
       hash: string;
-    } = await fetch("https://peqnu-backend-aflavziouq-uc.a.run.app/", {
+    } = await fetch(BACKEND_URL, {
       method: "POST",
       body: JSON.stringify({ url }),
     }).then((res) => res.json());

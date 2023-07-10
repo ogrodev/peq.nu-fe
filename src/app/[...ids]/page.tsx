@@ -1,6 +1,7 @@
 "use client";
 import Loader from "@/components/Loader";
 import Text from "@/components/Typography/text";
+import { BACKEND_URL } from "@/constants/env";
 import { cn } from "@/utils/className";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -12,9 +13,7 @@ export default function Index({ params }: { params: { ids: string[] } }) {
     const fetchUrl = async () => {
       const hash = params.ids.slice(-1)[0];
       if (!hash) return toast.error("Deu ruim, tente novamente.");
-      const originalUrl: string = await fetch(
-        `https://peqnu-backend-aflavziouq-uc.a.run.app/${hash}`
-      )
+      const originalUrl: string = await fetch(`${BACKEND_URL}${hash}`)
         .then((res) => res.json())
         .then((res: { url: string }) => res.url);
 
