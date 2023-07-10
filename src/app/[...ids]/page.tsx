@@ -3,6 +3,7 @@ import Text from "@/components/Typography/text";
 import { BACKEND_URL } from "@/constants/env";
 import { cn } from "@/utils/className";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import urlMetadata from "url-metadata";
 import Redirector from "./Redirector";
 
@@ -19,10 +20,15 @@ export default function Index({ params }: { params: { ids: string[] } }) {
           "flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[rgb(5_61_56)] to-[rgb(20_20_15)]"
         )}
       >
-        <Text as="h1" size="5xl" className="mb-10 text-primary">
-          Calma que já vai!
-        </Text>
-        <Redirector params={params} />
+        <Suspense
+          fallback={
+            <Text as="h1" size="5xl" className="mb-10 text-primary">
+              Calma que já vai!
+            </Text>
+          }
+        >
+          <Redirector params={params} />
+        </Suspense>
         <Loader />
       </main>
     </>
