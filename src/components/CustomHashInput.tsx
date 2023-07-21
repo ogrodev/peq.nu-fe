@@ -37,14 +37,22 @@ export default function CustomHashInput() {
           </Text>
         </div>
         <input
-          id={useCustom ? "hash" : "deactivated"}
-          name={useCustom ? "hash" : "deactivated"}
+          id="hash"
+          name="hash"
           placeholder="seu_link"
           className={cn(
             "h-10 w-[90px] px-3",
             "border border-gray-700/10 bg-[#223733] text-white focus:outline-none",
             "flex-grow font-expletus placeholder:text-gray-400"
           )}
+        />
+        <input
+          id="useCustom"
+          name="useCustom"
+          type="checkbox"
+          className="hidden"
+          checked={useCustom}
+          onChange={() => void 0}
         />
       </div>
     </div>

@@ -55,10 +55,16 @@ export default function Home() {
 
   const fetchShortened = async (url: string, customHash?: string) => {
     const fetchUrl = customHash ? BACKEND_URL + "/" + customHash : BACKEND_URL;
-    return fetch(fetchUrl, {
+    const res = await fetch(fetchUrl, {
       method: "POST",
       body: JSON.stringify({ url }),
-    }).then((res) => (res?.ok ? res.json() : handleError(res)));
+    }).then(async (res) => {
+      if (res?.ok) return res.json();
+      await handleError(res);
+      return false;
+    });
+
+    return res;
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -68,6 +74,7 @@ export default function Home() {
 
     const url = `${(e.target as any)?.["url"]?.value}`;
     const customHash = `${(e.target as any)?.["hash"]?.value ?? ""}`;
+    const useCustom = (e.target as any)?.["useCustom"]?.checked ?? false;
 
     if (customHash?.length > 0) {
       if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(customHash))
@@ -75,10 +82,10 @@ export default function Home() {
     }
 
     setShortening(true);
-    fetchShortened(url, customHash)
+    fetchShortened(url, useCustom ? customHash : undefined)
       .then((res) => {
-        if (res.ok)
-          setShortened((prev) => (!prev ? `https://peq.nu/${res?.hash}` : ""));
+        if (res?.hash)
+          setShortened((prev) => (!prev ? `https://peq.nu/${res.hash}` : ""));
       })
       .finally(() => setShortening(false));
   };
@@ -88,6 +95,15 @@ export default function Home() {
     toast.success("Link copiado para área de transferência!", {
       icon: "📋",
     });
+  };
+
+  const handleReset = () => {
+    setShortened("");
+    const urlInput = document.getElementById("url") as HTMLInputElement;
+    const hashInput = document.getElementById("hash") as HTMLInputElement;
+
+    urlInput.value = "";
+    hashInput.value = "";
   };
 
   return (
@@ -174,7 +190,7 @@ export default function Home() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setShortened("")}
+                      onClick={handleReset}
                       title="Gerar novo link encurtado"
                     >
                       <PlusIcon />
