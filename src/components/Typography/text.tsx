@@ -21,8 +21,7 @@ export type TAs =
   | "p"
   | "span"
   | "link"
-  | "label"
-  | "span";
+  | "label";
 
 type Size = keyof typeof sizeClassMap;
 
@@ -56,7 +55,7 @@ const Text = forwardRef(
       "font-expletus",
       sizeClassMap[size],
       className,
-      disabledClass
+      disabledClass,
     );
 
     const Component: ElementType = rest.as;
@@ -75,7 +74,7 @@ const Text = forwardRef(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <Component {...finalProps} ref={forwardedRef as any} />;
-  }
+  },
 ) as TextComponentWithRef;
 
 Text.displayName = "Text";

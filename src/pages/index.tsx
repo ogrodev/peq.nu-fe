@@ -42,7 +42,7 @@ const poppins = Poppins({
 });
 
 const urlRegex = new RegExp(
-  "^((https?|ftp|smtp)://)?(www.)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(/.*)?$"
+  "^((https?|ftp|smtp)://)?(www.)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(/.*)?$",
 );
 
 export default function Home() {
@@ -60,7 +60,7 @@ export default function Home() {
           ? err
           : "message" in err
           ? err.message
-          : "Erro desconhecido!"
+          : "Erro desconhecido!",
       );
     });
   };
@@ -79,7 +79,7 @@ export default function Home() {
     return res;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (urlRegex.test(`${(e.target as any)?.["url"]?.value}`) === false)
       return toast.error("Coloque uma url válida!");
@@ -93,7 +93,7 @@ export default function Home() {
     }
 
     setShortening(true);
-    fetchShortened(url, useCustom ? customHash : undefined)
+    await fetchShortened(url, useCustom ? customHash : undefined)
       .then((res) => {
         if (res?.hash)
           setShortened((prev) => (!prev ? `https://peq.nu/${res.hash}` : ""));
@@ -132,7 +132,7 @@ export default function Home() {
           "flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background to-dark",
           "relative",
           expletus.className,
-          poppins.className
+          poppins.className,
         )}
       >
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
@@ -162,14 +162,14 @@ export default function Home() {
                   className={cn(
                     "mr-[100px] h-10 w-full rounded-full pl-3 pr-36",
                     "border border-gray-700/10 bg-[#223733] text-white focus:outline-none",
-                    "text-center font-expletus placeholder:text-gray-400"
+                    "text-center font-expletus placeholder:text-gray-400",
                   )}
                 />
                 <button
                   type="submit"
                   className={cn(
                     "-ml-8 h-10 rounded-full bg-primary px-8 font-poppins font-semibold text-white",
-                    "absolute right-0 top-0 max-w-full"
+                    "absolute right-0 top-0 max-w-full",
                   )}
                 >
                   {shortening ? (
@@ -186,7 +186,7 @@ export default function Home() {
                     "bg-primary text-white",
                     "flex items-center justify-center gap-3",
                     "translate-x-1/2 scale-x-0 transition-all",
-                    !!shortened && "translate-x-0 scale-x-100"
+                    !!shortened && "translate-x-0 scale-x-100",
                   )}
                 >
                   <Text as="span" size="lg">
@@ -248,7 +248,7 @@ function CheckButton() {
       onClick={handleTriggerClick}
       className={cn(
         "h-10 rounded-full bg-secondary px-8 font-poppins font-semibold text-green-950",
-        "absolute bottom-10 right-10 max-w-full"
+        "absolute bottom-10 right-10 max-w-full",
       )}
     >
       Checar status de link
@@ -278,7 +278,7 @@ function CheckLinkDialog() {
           ? err
           : "message" in err
           ? err.message
-          : "Erro desconhecido!"
+          : "Erro desconhecido!",
       );
     });
   };
@@ -339,14 +339,14 @@ function CheckLinkDialog() {
                 className={cn(
                   "h-10 w-full rounded-full px-3",
                   "border border-gray-700/10 bg-[#223733] text-white focus:outline-none",
-                  "text-center font-expletus placeholder:text-gray-400"
+                  "text-center font-expletus placeholder:text-gray-400",
                 )}
               />
               <button
                 type="submit"
                 className={cn(
                   "h-10 rounded-full bg-primary px-8 font-poppins font-semibold text-white",
-                  "max-w-full"
+                  "max-w-full",
                 )}
               >
                 Checar
