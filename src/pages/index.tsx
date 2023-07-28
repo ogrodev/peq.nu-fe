@@ -4,16 +4,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import { checkLinkAtom, isCustomAtom } from "@/atoms/home";
 import CustomHashInput from "@/components/CustomHashInput";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/Dialog";
 import CopyIcon from "@/components/Icons/Copy.icon";
 import PlusIcon from "@/components/Icons/Plus.icon";
+import Checkbox from "@/components/Inputs/Checkbox";
 import Loader from "@/components/Loader";
 import RepoLinksRow from "@/components/RepoLinksRow";
 import Text from "@/components/Typography/text";
 import { BACKEND_URL } from "@/constants/env";
 import { cn } from "@/utils/className";
+import { useAtom } from "jotai";
 import { Expletus_Sans, Poppins } from "next/font/google";
 import Head from "next/head";
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Toaster, toast } from "react-hot-toast";
 
@@ -37,6 +48,7 @@ const urlRegex = new RegExp(
 export default function Home() {
   const [shortened, setShortened] = useState<string>("");
   const [shortening, setShortening] = useState<boolean>(false);
+  const [useCustom, setIsCustom] = useAtom(isCustomAtom);
 
   const handleError = (res: Response) => {
     if (res.status === 429)
@@ -74,7 +86,6 @@ export default function Home() {
 
     const url = `${(e.target as any)?.["url"]?.value}`;
     const customHash = `${(e.target as any)?.["hash"]?.value ?? ""}`;
-    const useCustom = (e.target as any)?.["useCustom"]?.checked ?? false;
 
     if (customHash?.length > 0) {
       if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(customHash))
@@ -119,6 +130,7 @@ export default function Home() {
       <main
         className={cn(
           "flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background to-dark",
+          "relative",
           expletus.className,
           poppins.className
         )}
@@ -141,7 +153,7 @@ export default function Home() {
             </Text>
           </div>
           <div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="group relative w-[600px] max-w-[95vw] overflow-hidden rounded-full lg:max-w-[600px]">
                 <input
                   id="url"
@@ -201,10 +213,192 @@ export default function Home() {
               <CustomHashInput />
             </form>
           </div>
-          <RepoLinksRow />
+          <div className="flex flex-col items-center">
+            <div className="mb-4">
+              <Checkbox
+                id="customLink"
+                label="Link personalizado"
+                labelClassName="text-white"
+                onCheckedChange={(checked) => {
+                  if (!checked) return setIsCustom(false);
+                  return setIsCustom(true);
+                }}
+              />
+            </div>
+          </div>
         </div>
+        <RepoLinksRow />
+        <CheckButton />
+        <CheckLinkDialog />
       </main>
       <Toaster />
     </>
+  );
+}
+
+function CheckButton() {
+  const [, setCheckLink] = useAtom(checkLinkAtom);
+  const handleTriggerClick = () => {
+    setCheckLink((prev) => !prev);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleTriggerClick}
+      className={cn(
+        "h-10 rounded-full bg-secondary px-8 font-poppins font-semibold text-green-950",
+        "absolute bottom-10 right-10 max-w-full"
+      )}
+    >
+      Checar status de link
+    </button>
+  );
+}
+
+interface Stats {
+  clicks: number;
+  custom: boolean;
+  url: string;
+}
+
+function CheckLinkDialog() {
+  const [openCheckLink, setOpenCheckLink] = useAtom(checkLinkAtom);
+  const [stats, setStats] = useState<Stats>();
+
+  const handleError = (res: Response) => {
+    if (res.status === 429)
+      return toast.error("Você está fazendo muitas requisições!");
+    if (res.status === 503)
+      return toast.error("Serviço indisponível no momento!");
+
+    return res.json().then((err: { message: string } | string) => {
+      toast.error(
+        typeof err === "string"
+          ? err
+          : "message" in err
+          ? err.message
+          : "Erro desconhecido!"
+      );
+    });
+  };
+
+  const fetchStatistics = async (hash: string) => {
+    const fetchUrl = BACKEND_URL + hash + "/status";
+    const res = await fetch(fetchUrl, {
+      method: "GET",
+    }).then(async (res) => {
+      if (res?.ok) return res.json();
+      await handleError(res);
+      return false;
+    });
+
+    return res;
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const url = `${(e.target as any)?.["shortUrl"]?.value}`;
+    const isPeqNu = url.includes("peq.nu");
+    if (!isPeqNu) {
+      toast.error("Apenas links do peq.nu são aceitos!");
+      return;
+    }
+    const hash = url.split("peq.nu/")[1];
+    if (!hash?.length) return toast.error("Link inválido!");
+    await fetchStatistics(hash).then((res: Stats) => setStats(res));
+  };
+
+  return (
+    <Dialog
+      open={openCheckLink}
+      onOpenChange={(o) => {
+        setOpenCheckLink(o);
+        setStats(undefined);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <Text as="h2" size="base" className="font-semibold text-gray-200">
+              Estatísticas de link
+            </Text>
+          </DialogTitle>
+          <DialogDescription>
+            <Text as="h3" size="lg" className="font-extrabold text-gray-200">
+              Cheque o status de um link encurtado.
+            </Text>
+            <form
+              onSubmit={handleSubmit}
+              className="mb-5 mt-8 flex flex-col items-center gap-4"
+            >
+              <input
+                id="shortUrl"
+                name="shortUrl"
+                placeholder="Coloque aqui seu link peq.nu/..."
+                className={cn(
+                  "h-10 w-full rounded-full px-3",
+                  "border border-gray-700/10 bg-[#223733] text-white focus:outline-none",
+                  "text-center font-expletus placeholder:text-gray-400"
+                )}
+              />
+              <button
+                type="submit"
+                className={cn(
+                  "h-10 rounded-full bg-primary px-8 font-poppins font-semibold text-white",
+                  "max-w-full"
+                )}
+              >
+                Checar
+              </button>
+            </form>
+            {stats && (
+              <div className="mt-10">
+                <Text
+                  as="h3"
+                  size="lg"
+                  className="font-extrabold text-gray-200"
+                >
+                  Estatísticas:
+                </Text>
+                <div className="mt-4 space-y-2">
+                  <Text
+                    as="p"
+                    size="sm"
+                    className="font-semibold text-gray-200"
+                  >
+                    Cliques: <span className="font-bold">{stats.clicks}</span>
+                  </Text>
+                  <Text
+                    as="p"
+                    size="sm"
+                    className="font-semibold text-gray-200"
+                  >
+                    Link personalizado:{" "}
+                    <span className="font-bold">
+                      {stats.custom ? "Sim" : "Não"}
+                    </span>
+                  </Text>
+                  <Text
+                    as="p"
+                    size="sm"
+                    className="font-semibold text-gray-200"
+                  >
+                    Link original:{" "}
+                    <Link
+                      href={stats.url}
+                      target="_blank"
+                      className="whitespace-nowrap font-bold underline"
+                    >
+                      {stats.url}
+                    </Link>
+                  </Text>
+                </div>
+              </div>
+            )}
+          </DialogDescription>
+        </DialogHeader>
+      </DialogContent>
+    </Dialog>
   );
 }

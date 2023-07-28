@@ -1,28 +1,17 @@
+import { isCustomAtom } from "@/atoms/home";
 import { cn } from "@/utils/className";
-import { useState } from "react";
+import { useAtom } from "jotai";
 import Text from "./Typography/text";
 
 export default function CustomHashInput() {
-  const [useCustom, setUseCustom] = useState<boolean>(false);
+  const [useCustom] = useAtom(isCustomAtom);
   return (
     <div className="relative h-24 w-[600px] max-w-[95vw] rounded-full lg:max-w-[600px]">
-      <button
-        type="button"
-        onClick={() => setUseCustom((prev) => !prev)}
-        className={cn(
-          "absolute left-1/2 top-0 w-[450px] -translate-x-1/2 rounded-b-3xl bg-primary p-3",
-          "translate-y-0 font-poppins font-semibold text-white transition-transform",
-          useCustom && "translate-y-[40px]"
-        )}
-      >
-        <Text as="span" size="sm">
-          {useCustom ? "Usar link aleatório" : "Usar link customizado"}
-        </Text>
-      </button>
       <div
         className={cn(
-          "mx-auto flex w-[450px] items-center justify-center",
-          !useCustom && "pointer-events-none overflow-hidden rounded-b-3xl"
+          "mx-auto flex w-[450px] items-center justify-center rounded-full opacity-100 transition-opacity",
+          "overflow-hidden",
+          !useCustom && "pointer-events-none overflow-hidden opacity-0"
         )}
       >
         <div

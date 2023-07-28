@@ -42,7 +42,7 @@ export default function RepoLinksRow() {
     },
   ];
   return (
-    <div className="flex items-center justify-center gap-8">
+    <div className="absolute bottom-10 left-1/2 flex -translate-x-1/2 items-center justify-center gap-8">
       {repos.map((repo, idx) => (
         <RepoLink key={idx} {...repo} />
       ))}
